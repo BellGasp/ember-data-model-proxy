@@ -1,37 +1,50 @@
----
 language: node_js
+
 node_js:
-  - "6"
+- '6'
 
 sudo: false
+dist: trusty
+
+addons:
+  chrome: stable
 
 cache:
   directories:
-    - $HOME/.npm
+  - $HOME/.npm
 
 env:
-  # we recommend testing LTS's and latest stable release (bonus points to beta/canary)
-  - EMBER_TRY_SCENARIO=ember-lts-2.4
-  - EMBER_TRY_SCENARIO=ember-lts-2.8
-  - EMBER_TRY_SCENARIO=ember-release
-  - EMBER_TRY_SCENARIO=ember-beta
-  - EMBER_TRY_SCENARIO=ember-canary
-  - EMBER_TRY_SCENARIO=ember-default
+- EMBER_TRY_SCENARIO=ember-lts-2.8
+- EMBER_TRY_SCENARIO=ember-lts-2.12
+- EMBER_TRY_SCENARIO=ember-release
+- EMBER_TRY_SCENARIO=ember-beta
+- EMBER_TRY_SCENARIO=ember-canary
+- EMBER_TRY_SCENARIO=ember-default
 
 matrix:
   fast_finish: true
   allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-canary
+  - env: EMBER_TRY_SCENARIO=ember-canary
 
 before_install:
-  - npm config set spin false
-  - npm install -g phantomjs-prebuilt
-  - phantomjs --version
-
-install:
-  - npm install
+- npm config set spin false
+- npm install -g npm@4
+- npm --version
 
 script:
-  # Usually, it's ok to finish the test scenario without reverting
-  #  to the addon's original dependency state, skipping "cleanup".
-  - node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO test --skip-cleanup
+- node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO test --skip-cleanup
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: FbG7q2WitdnQ3TNXP+B7QPGLQ67mf/x5BIGYdiU94AQTHn+DFe9YyBqfAkTjij177eN84bgRxYvHkeuDqvIBSSYmEDXoHzCR+DROseOSzKJ8l5ORjCqwAwUvCWtx5/At1kOAYa9tmYFhkeSuC2GycVsaXzuMzIe1MlaftSUivy3Y3+XhRPd/TkvGrp2wpcdWChv7DKtmFr1aG/pk0DZkhmV2G0d8cl6WAVHYFqh+vCWEMN56B+uhTRdt6lcyMnYq/LubKSq2bllP2auwdHy+WoPGLEVtTQ7VeV62A5JTZmrDvpklfVyUPe4TpkIRP3EOZsC4LDXD9t9ps4+e2Od8UV7T2QIpz3H7lihyEWl3C2f03dfKfR2NeaGnVmV+231U6PTk6k8dq2EDocG9QD2rTmFEr795r2BlhvgeeNoj8dmq88MSgPDCFsA/IX2xNAXmKDaYAJKwThaG2lv7A9U6aCArO6l+EMyWE3VplMnvnM9VGlBlxI4B6bKt/UJtG5R1Fz4LD1H7B/lmFUvdwIOZOLYiU4AvDNA4uWmdSUzIYQGmsQN8I058VXI9oRBmYd8vWHzx3UM3Cjl2O5Jq1KRY0/7hWfxYCkCYQsLKbGxwoWR9EBlM9O/hJC/yhY9FfbvNPKujLt987Yxcky1bt0qa5eQsAuLteaRA+oWV3Jw+jkg=
+
+deploy:
+  provider: npm
+  email: bobby_mousseau@hotmail.com
+  on:
+    branch: master
+    tags: true
+  api_key:
+    secure: CjFDRP3WhMLElgLQENMoJ3KBzkvVPHygA1CFz7pUPi6MH0/R+4lIII9Etk3C8nA3LoVVZOedvFh1S/3MAiSrDv6QMNKrX/ofD9soKcHqQpb0sgRTAzOkRLM0i10X+PlBvorYVDDhXOM0ez8r3dTmTGbklCJkFgljy89DnUfyHAzyEWqiZGLJ5mfKv6g5KVp9oSlxhjcXXy7jN3KOASO8M0UpXpxbtAqj2mf2XzSPB/b0QdyMdSI2y9VaknRYl0FF+1gAa7V1634Xu1JWkMbQ66wBZmodtkHrrBGkTJFDXh85uC4o4NUlRzCFt+7lZrS+3g6Eu62L1FvGqAr4ruLnduYyroWCQFYtC9EYsfkkeSFj/Cke7xJ2txUyYHgKNXuGpJzy9DulMqzwkNdOqnniNT+xsi9KIFWPL845U/X+oT0Se+ve0eLwQP75h01hgSc6h8VLmRlgSoYRf6FQBIZQxUltBVFe9+bn3UsCFRukwX3s6Y3RPP7OgfutoYxnPpjGm5+DO4P8B7zi/Jd7M1h9pg/t4Nk0bczzF1kI0wI8BJteRBmj7iov4Eu8mCDKu0b+E7ss+1cNcfsBMvRji+mBvWcg+3qk5MAtVwAd80fqtoSdk4JCU2IpdDL9pCoD1h8REMfnD5HA7CoyBxHCsCPgweEx62Ih8T+L4awkE+CdsKY=
