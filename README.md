@@ -1,11 +1,11 @@
-# ember-proxy-model
+# ember-data-model-proxy
 
 This README outlines the details of collaborating on this Ember addon.
 
 ## Installation
 
 * `git clone <repository-url>` this repository
-* `cd ember-proxy-model`
+* `cd ember-data-model-proxy`
 * `npm install`
 
 ## Running

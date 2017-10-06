@@ -2,5 +2,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-proxy-model'
+  name: 'ember-data-model-proxy'
 };
