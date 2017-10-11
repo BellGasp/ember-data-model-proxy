@@ -22,24 +22,34 @@ export default Service.extend({
 
       if (relationshipsToProxy && relationshipsToProxy.length > 0) {
         model.eachRelationship((name, descriptor) => {
-          if (relationshipsToProxy.includes(name)) {
-            if (descriptor.kind === 'hasMany') {
+          if (descriptor.kind === 'hasMany') {
+            let hasManyModels = model.get(name);
 
+            if (relationshipsToProxy.includes(name)) {
               let relModelProxies = model.get(name)
                 .map(rel => {
                   let relModelProxy = this.createModelProxy(descriptor.type, rel);
                   let inverseKey = model.hasMany(name).hasManyRelationship.inverseKey;
                   relModelProxy.set(inverseKey, modelProxy);
+
                   return relModelProxy;
                 });
-              modelProxy.set(name, relModelProxies);
-            } else {
+              hasManyModels = relModelProxies;
+            }
 
+            modelProxy.set(name, hasManyModels)
+          } else {
+            let belongsToModel = model.get(name);
+
+            if (relationshipsToProxy.includes(name)) {
               let relModelProxy = this.createModelProxy(name, model.get(name));
               let inverseKey = model.belongsTo(name).hasManyRelationship.inverseKey;
               relModelProxy.set(inverseKey, modelProxy);
-              modelProxy.set(name, relModelProxy);
+
+              belongsToModel = relModelProxy;
             }
+
+            modelProxy.set(name, belongsToModel);
           }
         });
       }
