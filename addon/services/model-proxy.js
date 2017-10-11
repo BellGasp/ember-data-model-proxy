@@ -1,13 +1,22 @@
 import Service from '@ember/service';
-import EmberObject from '@ember/object';
+import EmberObject, { set, get } from '@ember/object';
 import { getOwner } from '@ember/application';
+import { assert } from '@ember/debug';
 
 export default Service.extend({
   _getModelProxy() {
     let app = getOwner(this);
     return app.lookup('util:model-proxy', { singleton: false });
   },
-  createModelProxy(modelType, model, relationshipsToProxy) {
+  createModelProxy(modelType, baseModel, ...relationshipsToProxy) {
+    assert('A model type must be passed as the first parameter.', modelType);
+
+    let model = baseModel
+    // Need to get the model in itself if it's a proxy (ObjectProxy)
+    if (baseModel && baseModel.get) {
+      model = baseModel.get('content') || baseModel;
+    }
+
     let modelProxy = this._getModelProxy();
     modelProxy.setProperties({
       type: modelType,
@@ -30,11 +39,12 @@ export default Service.extend({
                 .map(rel => {
                   let relModelProxy = this.createModelProxy(descriptor.type, rel);
                   let inverseKey = model.hasMany(name).hasManyRelationship.inverseKey;
-                  relModelProxy.set(inverseKey, modelProxy);
+                  get(relModelProxy, 'proxy').set(inverseKey, modelProxy);
 
                   return relModelProxy;
                 });
               hasManyModels = relModelProxies;
+              set(hasManyModels, 'isProxy', true);
             }
 
             modelProxy.set(name, hasManyModels)
@@ -43,8 +53,8 @@ export default Service.extend({
 
             if (relationshipsToProxy.includes(name)) {
               let relModelProxy = this.createModelProxy(name, model.get(name));
-              let inverseKey = model.belongsTo(name).hasManyRelationship.inverseKey;
-              relModelProxy.set(inverseKey, modelProxy);
+              let inverseKey = model.belongsTo(name).belongsToRelationship.inverseKey;
+              get(relModelProxy, 'proxy').set(inverseKey, modelProxy);
 
               belongsToModel = relModelProxy;
             }
