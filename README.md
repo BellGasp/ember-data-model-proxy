@@ -2,7 +2,7 @@
 [![npm version](https://badge.fury.io/js/ember-data-model-proxy.svg)](https://badge.fury.io/js/ember-data-model-proxy)
 [![Ember Observer Score](https://emberobserver.com/badges/ember-data-model-proxy.svg)](https://emberobserver.com/addons/ember-data-model-proxy)
 [![Build Status](https://travis-ci.org/BellGasp/ember-data-model-proxy.svg?branch=master)](https://travis-ci.org/BellGasp/ember-data-model-proxy)
-[![Code Climate](https://codeclimate.com/github/BellGasp/ember-data-model-proxy/badges/gpa.svg)](https://codeclimate.com/github/BellGasp/ember-data-model-proxy)
+[![Maintainability](https://api.codeclimate.com/v1/badges/6b301c2ec1f1ca0e937a/maintainability)](https://codeclimate.com/github/BellGasp/ember-data-model-proxy/maintainability)
 
 
 ## Description
