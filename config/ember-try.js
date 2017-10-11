@@ -1,3 +1,5 @@
+/* global module */
+
 module.exports = {
   scenarios: [
     {
@@ -12,7 +14,8 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-data': '~2.8.0'
         }
       }
     },
@@ -20,7 +23,8 @@ module.exports = {
       name: 'ember-lts-2.12',
       npm: {
         devDependencies: {
-          'ember-source': '~2.12.0'
+          'ember-source': '~2.12.0',
+          'ember-data': '~2.12.0'
         }
       }
     },
@@ -31,7 +35,8 @@ module.exports = {
           'ember': 'components/ember#release'
         },
         resolutions: {
-          'ember': 'release'
+          'ember': 'release',
+          'ember-data': 'release'
         }
       },
       npm: {
@@ -52,7 +57,8 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-data': 'beta'
         }
       }
     },
@@ -68,14 +74,21 @@ module.exports = {
       },
       npm: {
         devDependencies: {
-          'ember-source': null
+          'ember-source': null,
+          'ember-data': 'master'
         }
       }
     },
     {
       name: 'ember-default',
+      bower: {
+        dependencies: {}
+      },
       npm: {
-        devDependencies: {}
+        devDependencies: {
+          'ember-source': '~2.16.0',
+          'ember-data': '~2.16.0'
+        }
       }
     }
   ]
