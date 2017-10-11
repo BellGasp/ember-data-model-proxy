@@ -1,9 +1,10 @@
 {
   "name": "ember-data-model-proxy",
   "version": "0.0.0-beta.1",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "An Ember wrapper for ember-data model to proxy changes to be applied at a later time",
   "keywords": [
     "ember-addon",
+    "ember-data",
     "model",
     "proxy"
   ],
