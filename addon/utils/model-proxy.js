@@ -57,18 +57,20 @@ export default EmberObject.extend(Evented, {
     let hasManyArrayProxy = get(proxy, property);
     let modelArray = model.get(property);
 
-    hasManyArrayProxy.forEach(hasManyProxy => {
-      let hasManyModel = hasManyProxy;
+    if (get(hasManyArrayProxy, 'isProxy')) {
+      hasManyArrayProxy.forEach(hasManyProxy => {
+        let hasManyModel = hasManyProxy;
 
-      if (get(hasManyProxy, 'isProxy')) {
-        hasManyProxy.applyChanges();
-        hasManyModel = get(hasManyProxy, 'model');
-      }
+        if (get(hasManyProxy, 'isProxy')) {
+          hasManyProxy.applyChanges();
+          hasManyModel = get(hasManyProxy, 'model');
+        }
 
-      if (!modelArray.includes(hasManyModel)) {
-        arrayToAdd.addObject(hasManyModel);
-      }
-    });
+        if (!modelArray.includes(hasManyModel)) {
+          arrayToAdd.addObject(hasManyModel);
+        }
+      });
+    }
 
     let hasManyArrayProxyModels = hasManyArrayProxy.map(item => {
       if (get(item, 'isProxy')) {

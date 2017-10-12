@@ -75,7 +75,7 @@ test('it updates model with proxy deletion on applyChange', function(assert) {
   let proxy = this.createModelProxy('model', { firstName: '' }, model);
 
   proxy.deleteRecord();
-  
+
   assert.equal(proxy.get('proxy.isDeleted'), true);
   assert.equal(proxy.get('model.isDeleted'), false);
 
@@ -151,6 +151,7 @@ function(assert) {
   let proxy = this.createModelProxy('model',
     { firstName: '', multipleModels: A([multipleModel]) },
     model);
+  proxy.set('multipleModels.isProxy', true);
 
   proxy.get('multipleModels.firstObject').set('firstName', 'some-name');
 
@@ -173,6 +174,7 @@ function(assert) {
   let proxy = this.createModelProxy('model',
     { firstName: '', multipleModels: A([multipleModel]) },
     model);
+  proxy.set('multipleModels.isProxy', true);
 
   let secondMultipleModel = this.createModelProxy('multiple-model',
     { firstName: '2nd-some-firstName' });
