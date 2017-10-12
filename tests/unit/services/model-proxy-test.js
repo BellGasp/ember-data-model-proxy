@@ -80,3 +80,20 @@ test('it can create a model proxy with model and hasMany relationship', function
   assert.equal(proxy.get('multipleModels.firstObject.model'),
     model.get('multipleModels.firstObject'));
 });
+
+test('it can create a model proxy without model and hasMany relationship', function(assert) {
+  let service = this.subject();
+  let proxy = service.createModelProxy('model', null, 'multipleModels');
+  let multipleModel = service.createModelProxy('multiple-model');
+  multipleModel.set('firstName', 'some-firstName');
+
+  assert.ok(proxy.get('multipleModels'));
+  assert.notOk(proxy.get('model'));
+  assert.equal(proxy.get('multipleModels.isProxy'), true);
+  assert.equal(proxy.get('multipleModels.length'), 0);
+
+  proxy.get('multipleModels').addObject(multipleModel);
+
+  assert.equal(proxy.get('multipleModels.length'), 1);
+  assert.equal(proxy.get('multipleModels.firstObject.firstName'), 'some-firstName');
+});

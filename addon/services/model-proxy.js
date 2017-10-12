@@ -1,13 +1,91 @@
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
 import EmberObject, { set, get } from '@ember/object';
 import { getOwner } from '@ember/application';
 import { assert } from '@ember/debug';
+import { A } from '@ember/array';
 
 export default Service.extend({
+  store: service(),
+
   _getModelProxy() {
     let app = getOwner(this);
     return app.lookup('util:model-proxy', { singleton: false });
   },
+
+  _setupHasManyRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
+    let hasManyModels = A();
+    if (model) {
+      hasManyModels = model.get(relationship);
+      if (hasManyModels && hasManyModels.get) {
+        hasManyModels = hasManyModels.get('content') || hasManyModels;
+      }
+    }
+
+    if (createProxy) {
+      if (model) {
+        let relModelProxies = model.get(relationship).map(rel => {
+          let relModelProxy = this.createModelProxy(type, rel);
+          get(relModelProxy, 'proxy').set(inverseKey, proxy);
+
+          return relModelProxy;
+        });
+        hasManyModels = relModelProxies;
+      }
+
+      set(hasManyModels, 'isProxy', true);
+    }
+
+    get(proxy, 'proxy').set(relationship, hasManyModels)
+  },
+
+  _setupBelongsToRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
+    let belongsToModel;
+    if (model) {
+      belongsToModel = model.get(relationship);
+      if (belongsToModel && belongsToModel.get) {
+        belongsToModel = belongsToModel.get('content') || belongsToModel;
+      }
+    }
+
+    if (createProxy) {
+      let underlyingModel = model ? model.get(relationship) : null;
+      let relModelProxy = this.createModelProxy(type, underlyingModel);
+      get(relModelProxy, 'proxy').set(inverseKey, proxy);
+
+      belongsToModel = relModelProxy;
+    }
+    get(proxy, 'proxy').set(relationship, belongsToModel);
+  },
+
+  _setupRelationship(name, descriptor, modelDefinition, proxy, model, relationshipsToProxy) {
+    let store = this.get('store');
+    let inverseKey = modelDefinition.inverseFor(name, store).name;
+    let createProxy = relationshipsToProxy.includes(name);
+
+    if (descriptor.kind === 'hasMany') {
+      this._setupHasManyRelationship(name, descriptor.type, inverseKey,
+        proxy, model, createProxy);
+    } else {
+      this._setupBelongsToRelationship(name, descriptor.type, inverseKey,
+        proxy, model, createProxy);
+    }
+  },
+
+  _fillProxyWithModelValues(modelType, proxy, model, relationshipsToProxy) {
+    let store = this.get('store');
+    let modelDefinition = store.modelFor(modelType);
+
+    modelDefinition.eachAttribute(name => {
+      if (model) {
+        proxy.set(name, model.get(name));
+      }
+    });
+
+    modelDefinition.eachRelationship((name, descriptor) =>
+      this._setupRelationship(name, descriptor, modelDefinition,
+        proxy, model, relationshipsToProxy));
+  },
+
   createModelProxy(modelType, baseModel, ...relationshipsToProxy) {
     assert('A model type must be passed as the first parameter.', modelType);
 
@@ -24,46 +102,8 @@ export default Service.extend({
       model: model
     });
 
-    if (model) {
-      model.eachAttribute(name => {
-        modelProxy.set(name, model.get(name));
-      });
+    this._fillProxyWithModelValues(modelType, modelProxy, model, relationshipsToProxy);
 
-      if (relationshipsToProxy && relationshipsToProxy.length > 0) {
-        model.eachRelationship((name, descriptor) => {
-          if (descriptor.kind === 'hasMany') {
-            let hasManyModels = model.get(name);
-
-            if (relationshipsToProxy.includes(name)) {
-              let relModelProxies = model.get(name)
-                .map(rel => {
-                  let relModelProxy = this.createModelProxy(descriptor.type, rel);
-                  let inverseKey = model.hasMany(name).hasManyRelationship.inverseKey;
-                  get(relModelProxy, 'proxy').set(inverseKey, modelProxy);
-
-                  return relModelProxy;
-                });
-              hasManyModels = relModelProxies;
-              set(hasManyModels, 'isProxy', true);
-            }
-
-            modelProxy.set(name, hasManyModels)
-          } else {
-            let belongsToModel = model.get(name);
-
-            if (relationshipsToProxy.includes(name)) {
-              let relModelProxy = this.createModelProxy(name, model.get(name));
-              let inverseKey = model.belongsTo(name).belongsToRelationship.inverseKey;
-              get(relModelProxy, 'proxy').set(inverseKey, modelProxy);
-
-              belongsToModel = relModelProxy;
-            }
-
-            modelProxy.set(name, belongsToModel);
-          }
-        });
-      }
-    }
     return modelProxy;
   }
 });
