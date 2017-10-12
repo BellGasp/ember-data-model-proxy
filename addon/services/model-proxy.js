@@ -12,13 +12,17 @@ export default Service.extend({
     return app.lookup('util:model-proxy', { singleton: false });
   },
 
+  _getRealModel(model){
+    if (model && model.get) {
+      return model.get('content') || model;
+    }
+    return model;
+  },
+
   _setupHasManyRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
     let hasManyModels = A();
     if (model) {
-      hasManyModels = model.get(relationship);
-      if (hasManyModels && hasManyModels.get) {
-        hasManyModels = hasManyModels.get('content') || hasManyModels;
-      }
+      hasManyModels = this._getRealModel(model.get(relationship));
     }
 
     if (createProxy) {
@@ -41,10 +45,7 @@ export default Service.extend({
   _setupBelongsToRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
     let belongsToModel;
     if (model) {
-      belongsToModel = model.get(relationship);
-      if (belongsToModel && belongsToModel.get) {
-        belongsToModel = belongsToModel.get('content') || belongsToModel;
-      }
+      belongsToModel = this._getRealModel(model.get(relationship));
     }
 
     if (createProxy) {
@@ -89,11 +90,7 @@ export default Service.extend({
   createModelProxy(modelType, baseModel, ...relationshipsToProxy) {
     assert('A model type must be passed as the first parameter.', modelType);
 
-    let model = baseModel
-    // Need to get the model in itself if it's a proxy (ObjectProxy)
-    if (baseModel && baseModel.get) {
-      model = baseModel.get('content') || baseModel;
-    }
+    let model = this._getRealModel(baseModel);
 
     let modelProxy = this._getModelProxy();
     modelProxy.setProperties({
