@@ -198,3 +198,27 @@ function(assert) {
   assert.equal(proxy.get('model.multipleModels.length'), 1);
   assert.equal(proxy.get('model.multipleModels.firstObject.firstName'), '2nd-some-firstName');
 });
+
+test('it updates relationships on applyChange without applying for the same model again (inverse)',
+function(assert) {
+  let model = make('model', 'with_multiple');
+
+  let multipleModel = this.createModelProxy('multiple-model',
+    { firstName: 'some-firstName' },
+    model.get('multipleModels.firstObject'));
+
+  let proxy = this.createModelProxy('model',
+    { firstName: '', multipleModels: A([multipleModel]) },
+    model);
+  proxy.set('multipleModels.isProxy', true);
+  multipleModel.set('proxy.model', proxy);
+
+  proxy.set('multipleModels.firstObject.firstName', 'some-random-name');
+  proxy.set('firstName', 'some-other-name');
+
+  run(() => proxy.applyChanges());
+
+  assert.equal(proxy.get('model.multipleModels.length'), 1);
+  assert.equal(proxy.get('model.multipleModels.firstObject.firstName'), 'some-random-name');
+  assert.equal(proxy.get('model.firstName'), 'some-other-name');
+});

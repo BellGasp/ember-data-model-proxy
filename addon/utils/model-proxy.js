@@ -35,7 +35,7 @@ export default EmberObject.extend(Evented, {
     }
   },
 
-  _applyBelongsToChanges(property) {
+  _applyBelongsToChanges(property, inverseKey) {
     let model = get(this, 'model');
     let proxy = get(this, 'proxy');
 
@@ -43,12 +43,13 @@ export default EmberObject.extend(Evented, {
     let belongsToModel = belongsToProxyModel;
 
     if (get(belongsToProxyModel, 'isProxy')) {
-      belongsToProxyModel.applyChanges();
+      belongsToProxyModel.applyChanges(true, inverseKey);
+
       belongsToModel = get(belongsToProxyModel, 'model');
     }
     model.set(property, belongsToModel);
   },
-  _applyHasManyChanges(property) {
+  _applyHasManyChanges(property, inverseKey) {
     let model = get(this, 'model');
     let proxy = get(this, 'proxy');
     let arrayToRemove = A();
@@ -62,7 +63,8 @@ export default EmberObject.extend(Evented, {
         let hasManyModel = hasManyProxy;
 
         if (get(hasManyProxy, 'isProxy')) {
-          hasManyProxy.applyChanges();
+          hasManyProxy.applyChanges(true, inverseKey);
+          
           hasManyModel = get(hasManyProxy, 'model');
         }
 
@@ -89,7 +91,7 @@ export default EmberObject.extend(Evented, {
     arrayToAdd.forEach(item => modelArray.addObject(item));
   },
 
-  applyChanges(applyRelationships = true) {
+  applyChanges(applyRelationships = true, ...ignoredRelationships) {
     let model = get(this, 'model');
     let proxy = get(this, 'proxy');
     if (!proxy) {
@@ -111,17 +113,24 @@ export default EmberObject.extend(Evented, {
 
     model = model.get('content') || model;
 
-    model.eachAttribute(name => {
+    let store = this.get('store');
+    let modelDefinition = store.modelFor(modelType);
+
+    modelDefinition.eachAttribute(name => {
       if (proxy.hasOwnProperty(name)) {
         model.set(name, get(proxy, name));
       }
     });
     if (applyRelationships) {
-      model.eachRelationship((name, descriptor) => {
-        if (descriptor.kind === 'belongsTo' && proxy.hasOwnProperty(name)) {
-          this._applyBelongsToChanges(name);
-        } else if (descriptor.kind === 'hasMany' && proxy.hasOwnProperty(name)) {
-          this._applyHasManyChanges(name);
+      modelDefinition.eachRelationship((name, descriptor) => {
+        if (!ignoredRelationships.includes(name)) {
+          let inverseKey = modelDefinition.inverseFor(name, store).name;
+
+          if (descriptor.kind === 'belongsTo' && proxy.hasOwnProperty(name)) {
+            this._applyBelongsToChanges(name, inverseKey);
+          } else if (descriptor.kind === 'hasMany' && proxy.hasOwnProperty(name)) {
+            this._applyHasManyChanges(name, inverseKey);
+          }
         }
       });
     }
