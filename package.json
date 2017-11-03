@@ -14,7 +14,10 @@
     "doc": "doc",
     "test": "tests"
   },
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bellgasp/ember-data-model-proxy.git"
+  },
   "scripts": {
     "build": "ember build",
     "start": "ember server",
