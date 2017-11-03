@@ -78,7 +78,7 @@ export default Service.extend({
 
     modelDefinition.eachAttribute(name => {
       if (model) {
-        proxy.set(name, model.get(name));
+        proxy.setUnknownProperty(name, model.get(name), true);
       }
     });
 

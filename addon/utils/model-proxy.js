@@ -23,11 +23,11 @@ export default EmberObject.extend(Evented, {
       return get(model, property);
     }
   },
-  setUnknownProperty(property, value) {
+  setUnknownProperty(property, value, initialSet) {
     let proxy = get(this, 'proxy');
     if (proxy) {
       set(proxy, property, value);
-      if (!get(proxy, 'hasDirtyAttributes')) {
+      if (!get(proxy, 'hasDirtyAttributes') && !initialSet) {
         set(proxy, 'hasDirtyAttributes', true);
         this.notifyPropertyChange('hasDirtyAttributes');
       }
