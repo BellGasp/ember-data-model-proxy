@@ -86,6 +86,7 @@ test('it updates model with proxy deletion on applyChange', function(assert) {
 
 test('it sets value in proxy and creates models on applyChanges', function(assert) {
   let proxy = this.createModelProxy('model', { firstName: '' });
+  proxy.set('proxy.isNew', true);
 
   proxy.set('firstName', 'some-name');
 
@@ -95,6 +96,7 @@ test('it sets value in proxy and creates models on applyChanges', function(asser
   run(() => proxy.applyChanges());
 
   assert.equal(proxy.get('model.firstName'), 'some-name');
+  assert.equal(proxy.get('proxy.isNew'), undefined);
 });
 
 test('it updates belongsTo model property with proxy relationships on applyChange',

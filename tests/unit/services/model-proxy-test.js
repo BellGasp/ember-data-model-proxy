@@ -41,6 +41,7 @@ test('it can create a model proxy without model', function(assert) {
   assert.ok(proxy.get('proxy'));
   assert.equal(proxy.get('type'), 'model');
   assert.notOk(proxy.get('model'));
+  assert.equal(proxy.get('proxy.isNew'), true);
 });
 
 test('it can create a model proxy with model', function(assert) {
@@ -56,7 +57,7 @@ test('it can create a model proxy with model without setting hasDirtyAttributes'
   let service = this.subject();
   let model = make('model', { firstName: 'some-firstName' });
   let proxy = service.createModelProxy('model', model);
- 
+
   assert.ok(proxy.get('model'));
   assert.equal(proxy.get('model.firstName'), 'some-firstName');
   assert.equal(proxy.get('hasDirtyAttributes'), false);

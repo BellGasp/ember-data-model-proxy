@@ -103,15 +103,16 @@ export default EmberObject.extend(Evented, {
       return;
     }
 
-    let modelType = this.get('type');
+    let modelType = get(this, 'type');
     if (!model && modelType) {
-      model = this.get('store').createRecord(modelType);
-      this.set('model', model);
+      model = get(this, 'store').createRecord(modelType);
+      set(this, 'model', model);
+      delete get(this, 'proxy').isNew;
     }
 
-    model = model.get('content') || model;
+    model = get(model, 'content') || model;
 
-    let store = this.get('store');
+    let store = get(this, 'store');
     let modelDefinition = store.modelFor(modelType);
 
     modelDefinition.eachAttribute(name => {
@@ -140,18 +141,8 @@ export default EmberObject.extend(Evented, {
 
   save(options) {
     this.applyChanges();
+
     let model = get(this, 'model');
-    if (model) {
-      return model.save(options);
-    }
-
-    let type = get(this, 'type');
-    let store = get(this, 'store');
-
-    model = store.createRecord(type);
-    set(this, 'model', model);
-
-    this.applyChanges();
     return model.save(options);
   },
   deleteRecord() {

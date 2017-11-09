@@ -14,7 +14,7 @@ export default Service.extend({
 
   _getRealModel(model){
     if (model && model.get) {
-      return model.get('content') || model;
+      return get(model, 'content') || model;
     }
     return model;
   },
@@ -59,7 +59,7 @@ export default Service.extend({
   },
 
   _setupRelationship(name, descriptor, modelDefinition, proxy, model, relationshipsToProxy) {
-    let store = this.get('store');
+    let store = get(this, 'store');
     let inverseKey = modelDefinition.inverseFor(name, store).name;
     let createProxy = relationshipsToProxy.includes(name);
 
@@ -73,13 +73,13 @@ export default Service.extend({
   },
 
   _fillProxyWithModelValues(modelType, proxy, model, relationshipsToProxy) {
-    let store = this.get('store');
+    let store = get(this, 'store');
     let modelDefinition = store.modelFor(modelType);
 
     if (!model) {
       proxy.setUnknownProperty('isNew', true, true);
     }
-    
+
     modelDefinition.eachAttribute(name => {
       if (model) {
         proxy.setUnknownProperty(name, model.get(name), true);
