@@ -76,6 +76,10 @@ export default Service.extend({
     let store = this.get('store');
     let modelDefinition = store.modelFor(modelType);
 
+    if (!model) {
+      proxy.setUnknownProperty('isNew', true, true);
+    }
+    
     modelDefinition.eachAttribute(name => {
       if (model) {
         proxy.setUnknownProperty(name, model.get(name), true);
