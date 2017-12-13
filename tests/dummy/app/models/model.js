@@ -19,6 +19,7 @@ export default Model.extend({
 
     return `${firstName} ${middleName} ${lastName}`;
   }),
+
   fullNameObserverHasTriggered: false,
   fullNameObserver: observer('firstName', 'lastName', 'middleName', function() {
     set(this, 'fullNameObserverHasTriggered', true);

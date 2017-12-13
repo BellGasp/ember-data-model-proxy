@@ -21,35 +21,19 @@ export default Service.extend({
     return model;
   },
 
-  _setupCurrentState(proxy, model) {
-    if (model) {
-      var currentState = EmberObject.create({
-        isEmpty: get(model, 'currentState.isEmpty'),
-        isLoading: get(model, 'currentState.isLoading'),
-        isLoaded: get(model, 'currentState.isLoaded'),
-        isDirty: get(model, 'currentState.isDirty'),
-        isSaving: get(model, 'currentState.isSaving'),
-        isDeleted: get(model, 'currentState.isDeleted'),
-        isNew: get(model, 'currentState.isNew'),
-        isValid: get(model, 'currentState.isValid')
-      });
-    } else {
-      currentState = EmberObject.create({
-        isEmpty: false,
-        isLoading: false,
-        isLoaded: false,
-        isDirty: false,
-        isSaving: false,
-        isDeleted: false,
-        isNew: true,
-        isValid: true
-      });
-    }
-
-    let internalProxy = get(proxy, 'proxy');
-    internalProxy.currentState = currentState;
-    internalProxy._internalModel.currentState = currentState;
+  _getDefaultCurrentState() {
+    return EmberObject.create({
+      isEmpty: false,
+      isLoading: false,
+      isLoaded: false,
+      isDirty: false,
+      isSaving: false,
+      isDeleted: false,
+      isNew: true,
+      isValid: true
+    });
   },
+
   _addObserver(proxy, model, propertyName) {
     let observer = model[propertyName];
     let observedProperties = observer.__ember_observes__;
@@ -59,10 +43,12 @@ export default Service.extend({
       addObserver(internalProxy, property, internalProxy, model[propertyName]);
     });
   },
+
   _addProperty(proxy, model, propertyName) {
     let propertyValue = model[propertyName];
     get(proxy, 'proxy')[propertyName] = propertyValue;
   },
+
   _addComputedProperty(proxy, modelDefinition, name) {
     let computedProperty = modelDefinition.proto()[name];
     proxy.setComputedProperty(name, computedProperty);
@@ -79,6 +65,7 @@ export default Service.extend({
         !proto[property].__ember_observes__;
     });
   },
+
   _getObservers(modelDefinition) {
     let proto = modelDefinition.proto();
     let properties = Object.keys(proto);
@@ -87,6 +74,7 @@ export default Service.extend({
       return proto[property].__ember_observes__;
     });
   },
+
   _getComputedProperties(modelDefinition) {
     let computedProperties = A();
 
@@ -126,12 +114,14 @@ export default Service.extend({
     properties.forEach(property =>
       this._addProperty(proxy, model || modelDefinition.proto(), property));
   },
+
   _setupObservers(proxy, model, modelDefinition) {
     let observers = this._getObservers(modelDefinition);
 
     observers.forEach(observer =>
       this._addObserver(proxy, model || modelDefinition.proto(), observer));
   },
+
   _setupComputedProperties(proxy, model, modelDefinition) {
     let computedProps = this._getComputedProperties(modelDefinition);
     let dependentProps = this._getMissingDependentProperties(proxy, modelDefinition, computedProps);
@@ -140,6 +130,25 @@ export default Service.extend({
       this._addProperty(proxy, model || modelDefinition.proto(), property));
     computedProps.forEach(computedProperty =>
       this._addComputedProperty(proxy, modelDefinition, computedProperty));
+  },
+
+  _setupCurrentState(proxy, model) {
+    if (model) {
+      var currentState = EmberObject.create({
+        isEmpty: get(model, 'currentState.isEmpty'),
+        isLoading: get(model, 'currentState.isLoading'),
+        isLoaded: get(model, 'currentState.isLoaded'),
+        isDirty: get(model, 'currentState.isDirty'),
+        isSaving: get(model, 'currentState.isSaving'),
+        isDeleted: get(model, 'currentState.isDeleted'),
+        isNew: get(model, 'currentState.isNew'),
+        isValid: get(model, 'currentState.isValid')
+      });
+
+      let internalProxy = get(proxy, 'proxy');
+      internalProxy.currentState = currentState;
+      internalProxy._internalModel.currentState = currentState;
+    }
   },
 
   _setupHasManyRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
@@ -194,11 +203,13 @@ export default Service.extend({
         proxy, model, createProxy);
     }
   },
+
   _setupRelationships(proxy, model, modelDefinition, relationshipsToProxy) {
     modelDefinition.eachRelationship((name, descriptor) =>
       this._setupRelationship(name, descriptor, modelDefinition,
         proxy, model, relationshipsToProxy));
   },
+
   _setupAttributes(proxy, model, modelDefinition) {
     modelDefinition.eachAttribute(name => {
       let value = model ? get(model, name) : '';
@@ -225,18 +236,22 @@ export default Service.extend({
     assert('A model type must be passed as the first parameter.', modelType);
 
     let model = this._getRealModel(baseModel);
-
     let modelProxy = this._getModelProxy();
+
+    let currentState = this._getDefaultCurrentState();
+
     setProperties(modelProxy, {
       type: modelType,
       proxy: EmberObject.create({
-        _internalModel: EmberObject.create()
+        currentState,
+        _internalModel: EmberObject.create({
+          currentState
+        }),
       }),
       model: model
     });
 
     this._fillProxyWithModelValues(modelType, modelProxy, model, relationshipsToProxy);
-
     return modelProxy;
   }
 });
