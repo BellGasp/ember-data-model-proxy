@@ -8,30 +8,11 @@ import { addObserver } from '@ember/object/observers';
 
 export default Service.extend({
   store: service(),
+  modelExtractor: service(),
 
   _getModelProxy() {
     let app = getOwner(this);
     return app.lookup('util:model-proxy', { singleton: false });
-  },
-
-  _getRealModel(model) {
-    if (model && get(model, 'content')) {
-      return get(model, 'content');
-    }
-    return model;
-  },
-
-  _getDefaultCurrentState() {
-    return EmberObject.create({
-      isEmpty: false,
-      isLoading: false,
-      isLoaded: false,
-      isDirty: false,
-      isSaving: false,
-      isDeleted: false,
-      isNew: true,
-      isValid: true
-    });
   },
 
   _addObserver(proxy, model, propertyName) {
@@ -54,77 +35,26 @@ export default Service.extend({
     proxy.setComputedProperty(name, computedProperty);
   },
 
-  _getSimpleProperties(modelDefinition) {
-    let proto = modelDefinition.proto();
-    let properties = Object.keys(proto);
-
-    return properties.filter(property => {
-      return !property.startsWith('_') &&
-        !proto[property].isClass &&
-        !proto[property].isDescriptor &&
-        !proto[property].__ember_observes__;
-    });
-  },
-
-  _getObservers(modelDefinition) {
-    let proto = modelDefinition.proto();
-    let properties = Object.keys(proto);
-
-    return properties.filter(property => {
-      return proto[property].__ember_observes__;
-    });
-  },
-
-  _getComputedProperties(modelDefinition) {
-    let computedProperties = A();
-
-    modelDefinition.eachComputedProperty((name, descriptor) => {
-      if (!(descriptor.isAttribute || descriptor.isRelationship)) {
-        computedProperties.addObject(name);
-      }
-    });
-
-    return computedProperties;
-  },
-
-  _getMissingDependentProperties(proxy, modelDefinition, computedProperties) {
-    let modelProto = modelDefinition.proto();
-
-    return computedProperties.map(computedProperty => {
-      let dependentKeys = modelProto[computedProperty]._dependentKeys;
-
-      if (dependentKeys) {
-        return dependentKeys.map(key => {
-          let firstKey = key.split('.')[0];
-
-          if (!get(proxy, 'proxy').hasOwnProperty(firstKey)) {
-            return firstKey;
-          }
-        });
-      }
-    })
-    .reduce((accumulator, keys) => A(accumulator.concat(keys)), A())
-    .uniq()
-    .filter(key => key);
-  },
-
   _setupSimpleProperties(proxy, model, modelDefinition) {
-    let properties = this._getSimpleProperties(modelDefinition);
+    let modelExtractor = this.get('modelExtractor');
+    let properties = modelExtractor.getSimpleProperties(modelDefinition);
 
     properties.forEach(property =>
       this._addProperty(proxy, model || modelDefinition.proto(), property));
   },
 
   _setupObservers(proxy, model, modelDefinition) {
-    let observers = this._getObservers(modelDefinition);
+    let modelExtractor = this.get('modelExtractor');
+    let observers = modelExtractor.getObservers(modelDefinition);
 
     observers.forEach(observer =>
       this._addObserver(proxy, model || modelDefinition.proto(), observer));
   },
 
   _setupComputedProperties(proxy, model, modelDefinition) {
-    let computedProps = this._getComputedProperties(modelDefinition);
-    let dependentProps = this._getMissingDependentProperties(proxy, modelDefinition, computedProps);
+    let modelExtractor = this.get('modelExtractor');
+    let computedProps = modelExtractor.getComputedProperties(modelDefinition);
+    let dependentProps = modelExtractor.getMissingDependentProperties(proxy, modelDefinition, computedProps);
 
     dependentProps.forEach(property =>
       this._addProperty(proxy, model || modelDefinition.proto(), property));
@@ -154,7 +84,8 @@ export default Service.extend({
   _setupHasManyRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
     let hasManyModels = A();
     if (model) {
-      hasManyModels = this._getRealModel(get(model, relationship));
+      let modelExtractor = this.get('modelExtractor');
+      hasManyModels = modelExtractor.getRealModel(get(model, relationship));
     }
 
     if (createProxy) {
@@ -177,7 +108,8 @@ export default Service.extend({
   _setupBelongsToRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
     let belongsToModel;
     if (model) {
-      belongsToModel = this._getRealModel(get(model, relationship));
+      let modelExtractor = this.get('modelExtractor');
+      belongsToModel = modelExtractor.getRealModel(get(model, relationship));
     }
 
     if (createProxy) {
@@ -234,11 +166,11 @@ export default Service.extend({
 
   createModelProxy(modelType, baseModel, ...relationshipsToProxy) {
     assert('A model type must be passed as the first parameter.', modelType);
-
-    let model = this._getRealModel(baseModel);
+    let modelExtractor = this.get('modelExtractor');
+    let model = modelExtractor.getRealModel(baseModel);
     let modelProxy = this._getModelProxy();
 
-    let currentState = this._getDefaultCurrentState();
+    let currentState = modelExtractor.getDefaultCurrentState();
 
     setProperties(modelProxy, {
       type: modelType,

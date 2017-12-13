@@ -3,7 +3,13 @@ import { make, manualSetup } from 'ember-data-factory-guy';
 import { run } from '@ember/runloop';
 
 moduleFor('service:model-proxy', 'Unit | Service | Model proxy', {
-  needs: ['util:model-proxy', 'model:model', 'model:single-model', 'model:multiple-model'],
+  needs: [
+    'service:model-extractor',
+    'util:model-proxy',
+    'model:model',
+    'model:single-model',
+    'model:multiple-model'
+  ],
   beforeEach() {
     manualSetup(this.container);
   },
