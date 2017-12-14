@@ -2,6 +2,7 @@ import { moduleFor, test } from 'ember-qunit';
 import { make, manualSetup } from 'ember-data-factory-guy';
 import { run } from '@ember/runloop';
 import { A } from '@ember/array';
+import EmberObject from '@ember/object';
 
 moduleFor('util:model-proxy', 'Unit | Utility | Model proxy', {
   needs: ['model:model', 'model:single-model', 'model:multiple-model'],
@@ -9,11 +10,26 @@ moduleFor('util:model-proxy', 'Unit | Utility | Model proxy', {
     manualSetup(this.container);
     this.createModelProxy = (type, proxy, model) => {
       let modelProxy = this.container.lookup('util:model-proxy', { singleton: false });
+
       modelProxy.setProperties({
         type,
         proxy,
         model
       });
+
+      modelProxy.set('isProxy', true);
+
+      modelProxy.set('currentState', EmberObject.create({
+        isEmpty: false,
+        isLoading: false,
+        isLoaded: false,
+        isDirty: false,
+        isSaving: false,
+        isDeleted: false,
+        isNew: false,
+        isValid: true
+      }));
+
       return modelProxy;
     }
   },
@@ -86,7 +102,6 @@ test('it updates model with proxy deletion on applyChange', function(assert) {
 
 test('it sets value in proxy and creates models on applyChanges', function(assert) {
   let proxy = this.createModelProxy('model', { firstName: '' });
-  proxy.set('proxy.isNew', true);
 
   proxy.set('firstName', 'some-name');
 
@@ -96,6 +111,7 @@ test('it sets value in proxy and creates models on applyChanges', function(asser
   run(() => proxy.applyChanges());
 
   assert.equal(proxy.get('model.firstName'), 'some-name');
+  assert.equal(proxy.get('isNew'), true);
   assert.equal(proxy.get('proxy.isNew'), undefined);
 });
 

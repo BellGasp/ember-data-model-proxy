@@ -23,15 +23,22 @@ export default EmberObject.extend(Evented, {
       return get(model, property);
     }
   },
+
   setUnknownProperty(property, value, initialSet) {
     let proxy = get(this, 'proxy');
     if (proxy) {
       set(proxy, property, value);
       if (!get(proxy, 'hasDirtyAttributes') && !initialSet) {
-        set(proxy, 'hasDirtyAttributes', true);
-        this.notifyPropertyChange('hasDirtyAttributes');
+        set(proxy, 'currentState.isDirty', true);
+        this.notifyPropertyChange('currentState.isDirty');
       }
       this.notifyPropertyChange(property);
+    }
+  },
+  setComputedProperty(name, computedProperty) {
+    let proxy = get(this, 'proxy');
+    if (proxy) {
+      proxy[name] = computedProperty;
     }
   },
 
@@ -47,7 +54,7 @@ export default EmberObject.extend(Evented, {
 
       belongsToModel = get(belongsToProxyModel, 'model');
     }
-    model.set(property, belongsToModel);
+    set(model, property, belongsToModel);
   },
   _applyHasManyChanges(property, inverseKey) {
     let model = get(this, 'model');
@@ -56,7 +63,7 @@ export default EmberObject.extend(Evented, {
     let arrayToAdd = A();
 
     let hasManyArrayProxy = get(proxy, property);
-    let modelArray = model.get(property);
+    let modelArray = get(model, property);
 
     hasManyArrayProxy.forEach(hasManyProxy => {
       let hasManyModel = hasManyProxy;
@@ -107,7 +114,6 @@ export default EmberObject.extend(Evented, {
     if (!model && modelType) {
       model = get(this, 'store').createRecord(modelType);
       set(this, 'model', model);
-      delete get(this, 'proxy').isNew;
     }
 
     model = get(model, 'content') || model;
@@ -117,7 +123,7 @@ export default EmberObject.extend(Evented, {
 
     modelDefinition.eachAttribute(name => {
       if (proxy.hasOwnProperty(name)) {
-        model.set(name, get(proxy, name));
+        set(model, name, get(proxy, name));
       }
     });
     if (applyRelationships) {
@@ -134,15 +140,25 @@ export default EmberObject.extend(Evented, {
       });
     }
 
-    set(proxy, 'hasDirtyAttributes', false);
-    this.notifyPropertyChange('hasDirtyAttributes');
+    set(proxy, 'currentState.isDirty', false);
+    this.notifyPropertyChange('currentState.isDirty');
   },
   discardChanges() {},
 
   save(options) {
     this.applyChanges();
-
     let model = get(this, 'model');
+    if (model) {
+      return model.save(options);
+    }
+
+    let type = get(this, 'type');
+    let store = get(this, 'store');
+
+    model = store.createRecord(type);
+    set(this, 'model', model);
+
+    this.applyChanges();
     return model.save(options);
   },
   deleteRecord() {
@@ -151,7 +167,7 @@ export default EmberObject.extend(Evented, {
     set(proxy, 'isDeleted', true);
     this.notifyPropertyChange('isDeleted');
 
-    set(proxy, 'hasDirtyAttributes', true);
-    this.notifyPropertyChange('hasDirtyAttributes');
+    set(proxy, 'currentState.isDirty', true);
+    this.notifyPropertyChange('currentState.isDirty');
   }
 });

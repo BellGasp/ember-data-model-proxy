@@ -1,8 +1,15 @@
 import { moduleFor, test } from 'ember-qunit';
 import { make, manualSetup } from 'ember-data-factory-guy';
+import { run } from '@ember/runloop';
 
 moduleFor('service:model-proxy', 'Unit | Service | Model proxy', {
-  needs: ['util:model-proxy', 'model:model', 'model:single-model', 'model:multiple-model'],
+  needs: [
+    'service:model-extractor',
+    'util:model-proxy',
+    'model:model',
+    'model:single-model',
+    'model:multiple-model'
+  ],
   beforeEach() {
     manualSetup(this.container);
   },
@@ -107,4 +114,57 @@ test('it can create a model proxy without model and hasMany relationship', funct
 
   assert.equal(proxy.get('multipleModels.length'), 1);
   assert.equal(proxy.get('multipleModels.firstObject.firstName'), 'some-firstName');
+});
+
+test('it can create a model proxy with model and computed property', function(assert) {
+  let service = this.subject();
+  let model = make('model', {
+    firstName: 'first',
+    middleName: 'middle',
+    lastName: 'last'
+  });
+  let proxy = service.createModelProxy('model', model);
+
+  assert.equal(proxy.get('model.fullName'), 'first middle last');
+  assert.equal(proxy.get('fullName'), 'first middle last');
+
+  proxy.set('firstName', 'other-first');
+
+  assert.equal(proxy.get('model.fullName'), 'first middle last');
+  assert.equal(proxy.get('fullName'), 'other-first middle last');
+});
+
+test('it can create a model proxy without model and computed property', function(assert) {
+  let service = this.subject();
+  let proxy = service.createModelProxy('model', null);
+
+  assert.notOk(proxy.get('model'));
+  assert.equal(proxy.get('fullName'), '  ');
+
+  proxy.setProperties({
+    firstName: 'firstName',
+    middleName: 'middleName',
+    lastName: 'lastName'
+  });
+
+  assert.notOk(proxy.get('model.fullName'));
+  assert.equal(proxy.get('fullName'), 'firstName middleName lastName');
+});
+
+test('it can create a model proxy without model and observer', function(assert) {
+  let service = this.subject();
+  let proxy = service.createModelProxy('model', null);
+
+  assert.notOk(proxy.get('model'));
+  assert.equal(proxy.get('fullNameObserverHasTriggered'), false);
+
+  run(() => proxy.setProperties({
+    firstName: 'firstName',
+    middleName: 'middleName',
+    lastName: 'lastName'
+  }));
+
+  assert.notOk(proxy.get('model.fullName'));
+  assert.equal(proxy.get('fullName'), 'firstName middleName lastName');
+  assert.equal(proxy.get('fullNameObserverHasTriggered'), true);
 });
