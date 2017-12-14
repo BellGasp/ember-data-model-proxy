@@ -43,7 +43,10 @@ export default Service.extend({
     let properties = Object.keys(proto);
 
     return properties.filter(property => {
-      return proto[property].__ember_observes__;
+      return !property.startsWith('_') &&
+      !proto[property].isClass &&
+      !proto[property].isDescriptor &&
+      proto[property].__ember_observes__;
     });
   },
 
