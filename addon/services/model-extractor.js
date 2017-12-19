@@ -72,9 +72,10 @@ export default Service.extend({
         return dependentKeys.map(key => {
           let firstKey = key.split('.')[0];
 
-          if (!get(proxy, 'proxy').hasOwnProperty(firstKey)) {
-            return firstKey;
-          }
+          if (!get(proxy, 'proxy').hasOwnProperty(firstKey) &&
+            !computedProperties.includes(firstKey)) {
+              return firstKey;
+            }
         });
       }
     })
