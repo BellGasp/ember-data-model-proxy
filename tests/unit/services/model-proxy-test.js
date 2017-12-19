@@ -73,7 +73,7 @@ test('it can create a model proxy with model without setting hasDirtyAttributes'
 test('it can create a model proxy with model and belongsTo relationship', function(assert) {
   let service = this.subject();
   let model = make('model', 'with_single', { firstName: 'some-firstName' });
-  let proxy = service.createModelProxy('model', model, 'singleModel');
+  let proxy = service.createModelProxy('model', model);
 
   assert.ok(proxy.get('model'));
   assert.equal(proxy.get('model.firstName'), 'some-firstName');
@@ -87,7 +87,7 @@ test('it can create a model proxy with model and belongsTo relationship', functi
 test('it can create a model proxy with model and hasMany relationship', function(assert) {
   let service = this.subject();
   let model = make('model', 'with_multiple', { firstName: 'some-firstName' });
-  let proxy = service.createModelProxy('model', model, 'multipleModels');
+  let proxy = service.createModelProxy('model', model);
 
   assert.ok(proxy.get('model'));
   assert.equal(proxy.get('model.firstName'), 'some-firstName');
@@ -101,7 +101,7 @@ test('it can create a model proxy with model and hasMany relationship', function
 
 test('it can create a model proxy without model and hasMany relationship', function(assert) {
   let service = this.subject();
-  let proxy = service.createModelProxy('model', null, 'multipleModels');
+  let proxy = service.createModelProxy('model', null);
   let multipleModel = service.createModelProxy('multiple-model');
   multipleModel.set('firstName', 'some-firstName');
 
