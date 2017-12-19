@@ -91,7 +91,7 @@ export default Service.extend({
     if (createProxy) {
       if (model) {
         let relModelProxies = get(model, relationship).map(rel => {
-          let relModelProxy = this.createModelProxy(type, rel);
+          let relModelProxy = this.createModelProxy(type, rel, false);
           set(get(relModelProxy, 'proxy'), inverseKey, proxy);
 
           return relModelProxy;
@@ -114,7 +114,7 @@ export default Service.extend({
 
     if (createProxy) {
       let underlyingModel = model ? get(model, relationship) : null;
-      let relModelProxy = this.createModelProxy(type, underlyingModel);
+      let relModelProxy = this.createModelProxy(type, underlyingModel, false);
       set(get(relModelProxy, 'proxy'), inverseKey, proxy);
 
       belongsToModel = relModelProxy;
@@ -122,24 +122,23 @@ export default Service.extend({
     set(get(proxy, 'proxy'), relationship, belongsToModel);
   },
 
-  _setupRelationship(name, descriptor, modelDefinition, proxy, model, relationshipsToProxy) {
+  _setupRelationship(name, descriptor, modelDefinition, proxy, model, proxyRelationships) {
     let store = get(this, 'store');
     let inverseKey = modelDefinition.inverseFor(name, store).name;
-    let createProxy = relationshipsToProxy.includes(name);
 
     if (descriptor.kind === 'hasMany') {
       this._setupHasManyRelationship(name, descriptor.type, inverseKey,
-        proxy, model, createProxy);
+        proxy, model, proxyRelationships);
     } else {
       this._setupBelongsToRelationship(name, descriptor.type, inverseKey,
-        proxy, model, createProxy);
+        proxy, model, proxyRelationships);
     }
   },
 
-  _setupRelationships(proxy, model, modelDefinition, relationshipsToProxy) {
+  _setupRelationships(proxy, model, modelDefinition, proxyRelationships) {
     modelDefinition.eachRelationship((name, descriptor) =>
       this._setupRelationship(name, descriptor, modelDefinition,
-        proxy, model, relationshipsToProxy));
+        proxy, model, proxyRelationships));
   },
 
   _setupAttributes(proxy, model, modelDefinition) {
@@ -149,14 +148,14 @@ export default Service.extend({
     });
   },
 
-  _fillProxyWithModelValues(modelType, proxy, model, relationshipsToProxy) {
+  _fillProxyWithModelValues(modelType, proxy, model, proxyRelationships) {
     let store = get(this, 'store');
     let modelDefinition = store.modelFor(modelType);
 
     this._setupCurrentState(proxy, model, modelDefinition);
 
     this._setupAttributes(proxy, model, modelDefinition);
-    this._setupRelationships(proxy, model, modelDefinition, relationshipsToProxy);
+    this._setupRelationships(proxy, model, modelDefinition, proxyRelationships);
 
     this._setupSimpleProperties(proxy, model, modelDefinition);
 
@@ -164,7 +163,7 @@ export default Service.extend({
     this._setupComputedProperties(proxy, model, modelDefinition);
   },
 
-  createModelProxy(modelType, baseModel, ...relationshipsToProxy) {
+  createModelProxy(modelType, baseModel, proxyRelationships = true) {
     assert('A model type must be passed as the first parameter.', modelType);
     let modelExtractor = this.get('modelExtractor');
     let model = modelExtractor.getRealModel(baseModel);
@@ -183,7 +182,7 @@ export default Service.extend({
       model: model
     });
 
-    this._fillProxyWithModelValues(modelType, modelProxy, model, relationshipsToProxy);
+    this._fillProxyWithModelValues(modelType, modelProxy, model, proxyRelationships);
     return modelProxy;
   }
 });
