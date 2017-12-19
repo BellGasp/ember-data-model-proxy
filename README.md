@@ -43,15 +43,9 @@ The main method it exposes is the `CreateModelProxy()` method:
 |---|:-------------:|:------:|:-------------:|
 | type | string (required) | Type of the model on which the proxy is based. This is usually the name of an ember-data model |
 | model | model | Base ember-data model to which the modifications will be applied. (Also initial state) |
-| relationships | string[] | Relationships for which proxy-models will be created too. |
 |||||
 | returns | model-proxy | Returns a new model-proxy object |
 
 Here, it's possible to pass only the type (`service.createModelProxy('address-model')` for example), which will result in a model-proxy with no base model. It can still be interacted with as usual, but now if you call `applyChanges` on that model-proxy, a record will be created using the type that was initially passed.
-
-It's also possible to add multiple relationships for which to create model-proxies. This will result in the proxy having a model-proxy for a belongsTo or an array of model-proxies in the case of an hasMany.
-For example, `service.createModelProxy('house', model, 'floors', 'address')`.
-This will create model-proxies for each floors, and for the address. The name that are passed are the name of the relationships in the model.
-
 
 For more information on using ember-cli, visit [https://ember-cli.com/](https://ember-cli.com/).
