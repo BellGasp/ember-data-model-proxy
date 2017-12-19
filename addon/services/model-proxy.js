@@ -107,12 +107,10 @@ export default Service.extend({
 
   _setupBelongsToRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
     let belongsToModel;
-    if (model) {
+    if (createProxy && model) {
       let modelExtractor = this.get('modelExtractor');
       belongsToModel = modelExtractor.getRealModel(get(model, relationship));
-    }
 
-    if (createProxy) {
       let underlyingModel = model ? get(model, relationship) : null;
       let relModelProxy = this.createModelProxy(type, underlyingModel, false);
       set(get(relModelProxy, 'proxy'), inverseKey, proxy);
