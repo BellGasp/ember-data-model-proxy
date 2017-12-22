@@ -49,7 +49,7 @@ export default EmberObject.extend(Evented, {
     let belongsToProxyModel = get(proxy, property);
     let belongsToModel = belongsToProxyModel;
 
-    if (get(belongsToProxyModel, 'isProxy')) {
+    if (belongsToProxyModel && get(belongsToProxyModel, 'isProxy')) {
       belongsToProxyModel.applyChanges(true, inverseKey);
 
       belongsToModel = get(belongsToProxyModel, 'model');
@@ -68,7 +68,7 @@ export default EmberObject.extend(Evented, {
     hasManyArrayProxy.forEach(hasManyProxy => {
       let hasManyModel = hasManyProxy;
 
-      if (get(hasManyProxy, 'isProxy')) {
+      if (hasManyModel && get(hasManyProxy, 'isProxy')) {
         hasManyProxy.applyChanges(true, inverseKey);
 
         hasManyModel = get(hasManyProxy, 'model');

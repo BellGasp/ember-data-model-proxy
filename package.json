@@ -1,6 +1,6 @@
 {
   "name": "ember-data-model-proxy",
-  "version": "0.0.0-beta.11",
+  "version": "0.0.0-beta.12",
   "description": "An Ember wrapper for ember-data model to proxy changes to be applied at a later time",
   "keywords": [
     "ember-addon",
