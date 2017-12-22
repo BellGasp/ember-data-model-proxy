@@ -83,22 +83,21 @@ export default Service.extend({
 
   _setupHasManyRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
     let hasManyModels = A();
+
     if (model) {
       let modelExtractor = this.get('modelExtractor');
       hasManyModels = modelExtractor.getRealModel(get(model, relationship));
     }
 
     if (createProxy) {
-      if (model) {
-        let relModelProxies = get(model, relationship).map(rel => {
-          let relModelProxy = this.createModelProxy(type, rel, false);
-          set(get(relModelProxy, 'proxy'), inverseKey, proxy);
+      let relModelProxies = get(model, relationship).map(rel => {
+        let relModelProxy = this.createModelProxy(type, rel, false);
+        set(get(relModelProxy, 'proxy'), inverseKey, proxy);
 
-          return relModelProxy;
-        });
-        hasManyModels = relModelProxies;
-      }
+        return relModelProxy;
+      });
 
+      hasManyModels = relModelProxies;
       set(hasManyModels, 'isProxy', true);
     }
 
@@ -107,16 +106,20 @@ export default Service.extend({
 
   _setupBelongsToRelationship(relationship, type, inverseKey, proxy, model, createProxy) {
     let belongsToModel = undefined;
-    if (createProxy && model) {
+
+    if (model) {
       let modelExtractor = this.get('modelExtractor');
       belongsToModel = modelExtractor.getRealModel(get(model, relationship));
+    }
 
+    if (createProxy) {
       let underlyingModel = model ? get(model, relationship) : null;
       let relModelProxy = this.createModelProxy(type, underlyingModel, false);
-      set(get(relModelProxy, 'proxy'), inverseKey, proxy);
 
+      set(get(relModelProxy, 'proxy'), inverseKey, proxy);
       belongsToModel = relModelProxy;
     }
+
     set(get(proxy, 'proxy'), relationship, belongsToModel);
 
     if (!get(proxy, 'proxy').hasOwnProperty(relationship)) {
