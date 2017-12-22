@@ -90,12 +90,12 @@ export default Service.extend({
     }
 
     if (createProxy) {
-      let relModelProxies = get(model, relationship).map(rel => {
+      let relModelProxies = A(hasManyModels.map(rel => {
         let relModelProxy = this.createModelProxy(type, rel, false);
         set(get(relModelProxy, 'proxy'), inverseKey, proxy);
 
         return relModelProxy;
-      });
+      }));
 
       hasManyModels = relModelProxies;
       set(hasManyModels, 'isProxy', true);
