@@ -3,4 +3,7 @@
 
 module.exports = {
   name: 'ember-data-model-proxy'
+  // ,isDevelopingAddon() {
+  //   return true;
+  // }
 };

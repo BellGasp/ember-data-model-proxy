@@ -126,15 +126,18 @@ export default EmberObject.extend(Evented, {
         set(model, name, get(proxy, name));
       }
     });
+
     if (applyRelationships) {
       modelDefinition.eachRelationship((name, descriptor) => {
         if (!ignoredRelationships.includes(name)) {
           let inverseKey = modelDefinition.inverseFor(name, store).name;
 
-          if (descriptor.kind === 'belongsTo' && proxy.hasOwnProperty(name)) {
-            this._applyBelongsToChanges(name, inverseKey);
-          } else if (descriptor.kind === 'hasMany' && proxy.hasOwnProperty(name)) {
-            this._applyHasManyChanges(name, inverseKey);
+          if (proxy.hasOwnProperty(name)) {
+            if (descriptor.kind === 'belongsTo') {
+              this._applyBelongsToChanges(name, inverseKey);
+            } else if (descriptor.kind === 'hasMany') {
+              this._applyHasManyChanges(name, inverseKey);
+            }
           }
         }
       });

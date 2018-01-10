@@ -7,7 +7,7 @@ export default Service.extend({
   store: service(),
 
   getRealModel(model) {
-    if (model && get(model, 'content')) {
+    if (model && model.hasOwnProperty('content')) {
       return get(model, 'content');
     }
     return model;
