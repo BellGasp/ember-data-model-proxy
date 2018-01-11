@@ -112,11 +112,11 @@ export default Service.extend({
         let underlyingModel = model ? get(model, relationship) : null;
         let relModelProxy = this.createModelProxy(type, underlyingModel, false);
 
-        set(get(relModelProxy, 'proxy'), inverseKey, proxy);
+        get(relModelProxy, 'proxy')[inverseKey] = proxy;
         belongsToModel = relModelProxy;
       }
     }
-    set(get(proxy, 'proxy'), relationship, belongsToModel);
+    get(proxy, 'proxy')[relationship] = belongsToModel;
 
     if (!get(proxy, 'proxy').hasOwnProperty(relationship)) {
       get(proxy, 'proxy')[relationship] = belongsToModel;

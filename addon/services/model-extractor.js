@@ -32,7 +32,7 @@ export default Service.extend({
 
     return properties.filter(property => {
       return !property.startsWith('_') &&
-        !(proto[property].toString() === '[COMPUTED PROPERTY]') &&
+        !(proto[property].toString() === '[COMPUTED PROPERTY]' || proto[property].isDescriptor) &&
         !(proto[property].toString().startsWith('(subclass')) &&
         !(typeof proto[property] === 'function' && proto[property].__ember_observes__);
     });
@@ -44,7 +44,7 @@ export default Service.extend({
 
     return properties.filter(property => {
       return !property.startsWith('_') &&
-        !(proto[property].toString() === '[COMPUTED PROPERTY]') &&
+        !(proto[property].toString() === '[COMPUTED PROPERTY]' || proto[property].isDescriptor) &&
         !(proto[property].toString().startsWith('(subclass')) &&
         (typeof proto[property] === 'function' && proto[property].__ember_observes__);
     });
