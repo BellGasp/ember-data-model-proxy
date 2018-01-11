@@ -32,9 +32,9 @@ export default Service.extend({
 
     return properties.filter(property => {
       return !property.startsWith('_') &&
-        !proto[property].isClass &&
-        !proto[property].isDescriptor &&
-        !proto[property].__ember_observes__;
+        !(proto[property].toString() === '[COMPUTED PROPERTY]') &&
+        !(proto[property].toString().startsWith('(subclass')) &&
+        !(typeof proto[property] === 'function' && proto[property].__ember_observes__);
     });
   },
 
@@ -44,9 +44,9 @@ export default Service.extend({
 
     return properties.filter(property => {
       return !property.startsWith('_') &&
-      !proto[property].isClass &&
-      !proto[property].isDescriptor &&
-      proto[property].__ember_observes__;
+        !(proto[property].toString() === '[COMPUTED PROPERTY]') &&
+        !(proto[property].toString().startsWith('(subclass')) &&
+        (typeof proto[property] === 'function' && proto[property].__ember_observes__);
     });
   },
 
@@ -60,27 +60,5 @@ export default Service.extend({
     });
 
     return computedProperties;
-  },
-
-  getMissingDependentProperties(proxy, modelDefinition, computedProperties) {
-    let modelProto = modelDefinition.proto();
-
-    return computedProperties.map(computedProperty => {
-      let dependentKeys = modelProto[computedProperty]._dependentKeys;
-
-      if (dependentKeys) {
-        return dependentKeys.map(key => {
-          let firstKey = key.split('.')[0];
-
-          if (!get(proxy, 'proxy').hasOwnProperty(firstKey) &&
-            !computedProperties.includes(firstKey)) {
-              return firstKey;
-            }
-        });
-      }
-    })
-    .reduce((accumulator, keys) => A(accumulator.concat(keys)), A())
-    .uniq()
-    .filter(key => key);
   }
 });

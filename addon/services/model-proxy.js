@@ -54,10 +54,7 @@ export default Service.extend({
   _setupComputedProperties(proxy, model, modelDefinition) {
     let modelExtractor = this.get('modelExtractor');
     let computedProps = modelExtractor.getComputedProperties(modelDefinition);
-    let dependentProps = modelExtractor.getMissingDependentProperties(proxy, modelDefinition, computedProps);
 
-    dependentProps.forEach(property =>
-      this._addProperty(proxy, model || modelDefinition.proto(), property));
     computedProps.forEach(computedProperty =>
       this._addComputedProperty(proxy, modelDefinition, computedProperty));
   },
@@ -163,8 +160,8 @@ export default Service.extend({
 
     this._setupSimpleProperties(proxy, model, modelDefinition);
 
-    this._setupObservers(proxy, model, modelDefinition);
     this._setupComputedProperties(proxy, model, modelDefinition);
+    this._setupObservers(proxy, model, modelDefinition);
   },
 
   createModelProxy(modelType, baseModel, proxyRelationships = true) {
