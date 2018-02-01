@@ -8,6 +8,8 @@ export default Model.extend({
   firstName: attr(),
   lastName: attr(),
   middleName: attr(),
+  defaultValueTest: attr({ defaultValue: 'test123' }),
+  noDefaultValueTest: attr(),
 
   singleModel: belongsTo('single-model'),
   multipleModels: hasMany('multiple-model'),
@@ -17,7 +19,7 @@ export default Model.extend({
     let lastName = get(this, 'lastName');
     let middleName = get(this, 'middleName');
 
-    return `${firstName} ${middleName} ${lastName}`;
+    return `${firstName || ''} ${middleName || ''} ${lastName || ''}`;
   }),
 
   fullNameObserverHasTriggered: false,

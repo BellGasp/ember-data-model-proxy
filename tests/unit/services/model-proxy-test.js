@@ -168,3 +168,25 @@ test('it can create a model proxy without model and observer', function(assert) 
   assert.equal(proxy.get('fullName'), 'firstName middleName lastName');
   assert.equal(proxy.get('fullNameObserverHasTriggered'), true);
 });
+
+test('it can create a model proxy with default value', function(assert) {
+  let service = this.subject();
+  let proxy = service.createModelProxy('model');
+
+  assert.equal(proxy.get('proxy.defaultValueTest'), 'test123');
+});
+
+test('it can create a model proxy without default value', function(assert) {
+  let service = this.subject();
+  let proxy = service.createModelProxy('model');
+
+  assert.equal(proxy.get('proxy.noDefaultValueTest'), null);
+});
+
+test('it can create a model proxy with default value overwritten', function(assert) {
+  let service = this.subject();
+  let model = make('model', { defaultValueTest: 'testOverwrite' });
+  let proxy = service.createModelProxy('model', model);
+
+  assert.equal(proxy.get('proxy.defaultValueTest'), 'testOverwrite');
+});
