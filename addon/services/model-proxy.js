@@ -143,8 +143,13 @@ export default Service.extend({
   },
 
   _setupAttributes(proxy, model, modelDefinition) {
-    modelDefinition.eachAttribute(name => {
-      let value = model ? get(model, name) : '';
+    modelDefinition.eachAttribute((name, descriptor) => {
+      let value = model ? get(model, name) : null;
+
+      if (value === null && descriptor.options.hasOwnProperty('defaultValue')) {
+        value = descriptor.options.defaultValue;
+      }
+      
       proxy.setUnknownProperty(name, value, true);
     });
   },
