@@ -125,14 +125,18 @@ export default Service.extend({
 
   _setupRelationship(name, descriptor, modelDefinition, proxy, model, proxyRelationships) {
     let store = get(this, 'store');
-    let inverseKey = modelDefinition.inverseFor(name, store).name;
+    let inverseConfig = modelDefinition.inverseFor(name, store);
 
-    if (descriptor.kind === 'hasMany') {
-      this._setupHasManyRelationship(name, descriptor.type, inverseKey,
-        proxy, model, proxyRelationships);
-    } else {
-      this._setupBelongsToRelationship(name, descriptor.type, inverseKey,
-        proxy, model, proxyRelationships);
+    if (inverseConfig) {
+      let inverseKey = inverseConfig.name;
+
+      if (descriptor.kind === 'hasMany') {
+        this._setupHasManyRelationship(name, descriptor.type, inverseKey,
+          proxy, model, proxyRelationships);
+      } else {
+        this._setupBelongsToRelationship(name, descriptor.type, inverseKey,
+          proxy, model, proxyRelationships);
+      }
     }
   },
 
@@ -149,7 +153,7 @@ export default Service.extend({
       if (value === null && descriptor.options.hasOwnProperty('defaultValue')) {
         value = descriptor.options.defaultValue;
       }
-      
+
       proxy.setUnknownProperty(name, value, true);
     });
   },
