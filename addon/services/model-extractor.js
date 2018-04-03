@@ -63,6 +63,13 @@ export default Service.extend({
   },
 
   getInverseKey(modelDefinition, relationshipName) {
-    return modelDefinition.inverseFor(relationshipName, this.get('store'));
+    let inverseKey = modelDefinition.inverseFor(relationshipName, this.get('store'));
+    let inverseKeyName = null;
+
+    if (inverseKey) {
+       inverseKeyName = inverseKey.name;
+    }
+
+    return inverseKeyName;
   }
 });
