@@ -12,6 +12,9 @@ FactoryGuy.define('model', {
     },
     with_multiple: {
       multipleModels: FactoryGuy.hasMany('multiple-model', 1)
+    },
+    with_no_inverse: {
+      noInverseModels: FactoryGuy.hasMany('no-inverse-model', 1)
     }
   }
 });

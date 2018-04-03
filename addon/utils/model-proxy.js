@@ -12,6 +12,7 @@ export default EmberObject.extend(Evented, {
   isProxy: true,
 
   store: service(),
+  modelExtractor: service(),
 
   unknownProperty(property) {
     let proxy = get(this, 'proxy');
@@ -130,18 +131,18 @@ export default EmberObject.extend(Evented, {
     if (applyRelationships) {
       modelDefinition.eachRelationship((name, descriptor) => {
         if (!ignoredRelationships.includes(name)) {
-          let inverseConfig = modelDefinition.inverseFor(name, store);
-          let inverseKey = null;
+          let inverseKey = this.get('modelExtractor').getInverseKey(modelDefinition, name);
+          let inverseKeyName = null;
 
-          if (inverseConfig) {
-            inverseKey = inverseConfig.name;
+          if (inverseKey) {
+            inverseKeyName = inverseKey.name;
           }
 
           if (proxy.hasOwnProperty(name)) {
             if (descriptor.kind === 'belongsTo') {
-              this._applyBelongsToChanges(name, inverseKey);
+              this._applyBelongsToChanges(name, inverseKeyName);
             } else if (descriptor.kind === 'hasMany') {
-              this._applyHasManyChanges(name, inverseKey);
+              this._applyHasManyChanges(name, inverseKeyName);
             }
           }
         }

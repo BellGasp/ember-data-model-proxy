@@ -130,19 +130,18 @@ export default Service.extend({
   },
 
   _setupRelationship(name, descriptor, modelDefinition, proxy, model, proxyRelationships) {
-    let store = get(this, 'store');
-    let inverseConfig = modelDefinition.inverseFor(name, store);
-    let inverseKey = null;
+    let inverseKey = this.get('modelExtractor').getInverseKey(modelDefinition, name);
+    let inverseKeyName = null;
 
-    if (inverseConfig) {
-       inverseKey = inverseConfig.name;
+    if (inverseKey) {
+       inverseKeyName = inverseKey.name;
     }
 
     if (descriptor.kind === 'hasMany') {
-      this._setupHasManyRelationship(name, descriptor.type, inverseKey,
+      this._setupHasManyRelationship(name, descriptor.type, inverseKeyName,
         proxy, model, proxyRelationships);
     } else {
-      this._setupBelongsToRelationship(name, descriptor.type, inverseKey,
+      this._setupBelongsToRelationship(name, descriptor.type, inverseKeyName,
         proxy, model, proxyRelationships);
     }
   },

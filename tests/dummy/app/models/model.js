@@ -13,6 +13,7 @@ export default Model.extend({
 
   singleModel: belongsTo('single-model'),
   multipleModels: hasMany('multiple-model'),
+  noInverseModels: hasMany('no-inverse-model'),
 
   fullName: computed('firstName', 'lastName', 'middleName', function () {
     let firstName = get(this, 'firstName');

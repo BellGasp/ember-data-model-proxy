@@ -8,7 +8,8 @@ moduleFor('service:model-proxy', 'Unit | Service | Model proxy', {
     'util:model-proxy',
     'model:model',
     'model:single-model',
-    'model:multiple-model'
+    'model:multiple-model',
+    'model:no-inverse-model'
   ],
   beforeEach() {
     manualSetup(this.container);
