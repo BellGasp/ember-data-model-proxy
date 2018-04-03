@@ -5,7 +5,13 @@ import { A } from '@ember/array';
 import EmberObject from '@ember/object';
 
 moduleFor('util:model-proxy', 'Unit | Utility | Model proxy', {
-  needs: ['model:model', 'model:single-model', 'model:multiple-model'],
+  needs: [
+    'service:modelExtractor',
+    'model:model',
+    'model:single-model',
+    'model:multiple-model',
+    'model:no-inverse-model'
+  ],
   beforeEach() {
     manualSetup(this.container);
     this.createModelProxy = (type, proxy, model) => {
@@ -238,5 +244,31 @@ function(assert) {
 
   assert.equal(proxy.get('model.multipleModels.length'), 1);
   assert.equal(proxy.get('model.multipleModels.firstObject.firstName'), 'some-random-name');
+  assert.equal(proxy.get('model.firstName'), 'some-other-name');
+});
+
+
+test('it updates relationships on applyChange without an inverse property', function(assert) {
+  let model = make('model', 'with_no_inverse');
+
+  let noInverseModel = this.createModelProxy('no-inverse-model',
+    { firstName: 'some-firstName' },
+    model.get('noInverseModels.firstObject')
+  );
+
+  let proxy = this.createModelProxy('model',
+    { firstName: '', noInverseModels: A([noInverseModel]) },
+    model
+  );
+  proxy.set('noInverseModels.isProxy', true);
+  noInverseModel.set('proxy.model', proxy);
+
+  proxy.set('noInverseModels.firstObject.firstName', 'some-random-name');
+  proxy.set('firstName', 'some-other-name');
+
+  run(() => proxy.applyChanges());
+
+  assert.equal(proxy.get('model.noInverseModels.length'), 1);
+  assert.equal(proxy.get('model.noInverseModels.firstObject.firstName'), 'some-random-name');
   assert.equal(proxy.get('model.firstName'), 'some-other-name');
 });

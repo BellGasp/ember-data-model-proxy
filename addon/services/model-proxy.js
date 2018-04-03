@@ -89,7 +89,10 @@ export default Service.extend({
     if (createProxy) {
       let relModelProxies = A(hasManyModels.map(rel => {
         let relModelProxy = this.createModelProxy(type, rel, false);
-        set(get(relModelProxy, 'proxy'), inverseKey, proxy);
+
+        if (inverseKey) {
+          set(get(relModelProxy, 'proxy'), inverseKey, proxy);
+        }
 
         return relModelProxy;
       }));
@@ -112,7 +115,10 @@ export default Service.extend({
         let underlyingModel = model ? get(model, relationship) : null;
         let relModelProxy = this.createModelProxy(type, underlyingModel, false);
 
-        get(relModelProxy, 'proxy')[inverseKey] = proxy;
+        if (inverseKey) {
+          get(relModelProxy, 'proxy')[inverseKey] = proxy;
+        }
+
         belongsToModel = relModelProxy;
       }
     }
@@ -124,8 +130,7 @@ export default Service.extend({
   },
 
   _setupRelationship(name, descriptor, modelDefinition, proxy, model, proxyRelationships) {
-    let store = get(this, 'store');
-    let inverseKey = modelDefinition.inverseFor(name, store).name;
+    let inverseKey = this.get('modelExtractor').getInverseKey(modelDefinition, name);
 
     if (descriptor.kind === 'hasMany') {
       this._setupHasManyRelationship(name, descriptor.type, inverseKey,
@@ -149,7 +154,7 @@ export default Service.extend({
       if (value === null && descriptor.options.hasOwnProperty('defaultValue')) {
         value = descriptor.options.defaultValue;
       }
-      
+
       proxy.setUnknownProperty(name, value, true);
     });
   },

@@ -60,5 +60,16 @@ export default Service.extend({
     });
 
     return computedProperties;
+  },
+
+  getInverseKey(modelDefinition, relationshipName) {
+    let inverseKey = modelDefinition.inverseFor(relationshipName, this.get('store'));
+    let inverseKeyName = null;
+
+    if (inverseKey) {
+       inverseKeyName = inverseKey.name;
+    }
+
+    return inverseKeyName;
   }
 });
